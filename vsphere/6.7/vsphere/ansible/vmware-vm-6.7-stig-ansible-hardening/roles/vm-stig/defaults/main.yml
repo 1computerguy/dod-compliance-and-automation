@@ -1,0 +1,48 @@
+---
+
+# Turn specific controls on/off by setting the value to true or false
+
+#VMCH-67-000001
+run_copy_disable: true
+#VMCH-67-000002
+run_dnd_disable: true
+#VMCH-67-000003
+run_paste_disable: true
+#VMCH-67-000004
+run_diskshrink_disable: true
+#VMCH-67-000005
+run_diskwiper_disable: true
+#VMCH-67-000006
+run_independent_persistent_disk: true
+#VMCH-67-000007
+run_hgfsserver_disable: true
+#VMCH-67-000008
+run_remove_floppy: true
+#VMCH-67-000009
+run_disconnect_cd: true
+#VMCH-67-000010
+run_remove_parallel_devices: true
+#VMCH-67-000011
+run_remove_serial_devices: true
+#VMCH-67-000012
+run_remove_usb_devices: true
+#VMCH-67-000013
+run_max_connections: true
+#VMCH-67-000014
+run_disable_vnc: true
+#VMCH-67-000015
+run_tools_setinfo_sizelimit: true
+#VMCH-67-000016
+run_device_connectable_disable: true
+#VMCH-67-000017
+run_disable_host_info: true
+#VMCH-67-000018
+run_disable_pshare_salt: true
+#VMCH-67-000019
+run_enable_dvfilters: true
+#VMCH-67-000022
+run_enable_desktop_autolock: true
+#VMCH-67-000023
+run_disable_3d: true
+#VMCH-67-000024
+run_encrypted_vmotion: true

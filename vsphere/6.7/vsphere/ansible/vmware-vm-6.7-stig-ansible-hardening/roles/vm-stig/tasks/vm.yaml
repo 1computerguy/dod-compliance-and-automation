@@ -1,0 +1,258 @@
+# VMware vSphere 6.7 vCenter Server Appliance Photon Ansible Playbook
+
+---
+
+ #---------- Ansible version 2.9.10 --------#
+
+
+############################################
+
+# This will disable copy operations between the guest OS and the remote console
+
+- name: VMCH-67-000001 - Disable VM Copy operations
+  community.vmware.vmware_guest:
+    name: {{ vm_name }}
+    state: present
+    validate_certs: no
+    customvalues:
+      - key: "isolation.tools.copy.disable"
+        value: {{ tools_copy }}
+  tags:
+    - VMCH-67-000001
+    - advsettings
+  when:
+    - run_copy_disable | bool
+
+############################################
+
+# This will disable drag-and-drop operations between the guest OS and the remote console
+
+- name: VMCH-67-000002 - Disable dnd operations
+  community.vmware.vmware_guest:
+    name: {{ vm_name }}
+    state: present
+    validate_certs: no
+    customvalues:
+      - key: "isolation.tools.dnd.disable"
+        value: {{ tools_dnd }}
+  tags:
+    - VMCH-67-000002
+    - advsettings
+  when:
+    - run_dnd_disable | bool
+
+############################################
+
+#  This will disable paste operations between the guest OS and the remote console
+
+- name: VMCH-67-000003 - Disable paste operations
+  community.vmware.vmware_guest:
+    name: {{ vm_name }}
+    state: present
+    validate_certs: no
+    customvalues:
+      - key: "isolation.tools.paste.disable"
+        value: {{ tools_paste }}
+  tags:
+    - VMCH-67-000003
+    - advsettings
+  when:
+    - run_paste_disable | bool
+
+############################################
+
+# This will disable disk shrinking to prevent denial of service on the VM
+
+- name: VMCH-67-000004 - Disable disk shrink operations
+  community.vmware.vmware_guest:
+    name: {{ vm_name }}
+    state: present
+    validate_certs: no
+    customvalues:
+      - key: "isolation.tools.diskShrink.disable"
+        value: {{ tools_diskshrink }}
+  tags:
+    - VMCH-67-000004
+    - advsettings
+  when:
+    - run_diskshrink_disable | bool
+
+############################################
+
+# This will disable disk wiping to prevent denial of service on the VM
+
+- name: VMCH-67-000005 - Disable disk wipe operations
+  community.vmware.vmware_guest:
+    name: {{ vm_name }}
+    state: present
+    validate_certs: no
+    customvalues:
+      - key: "isolation.tools.diskWiper.disable"
+        value: {{ tools_diskwipe }}
+  tags:
+    - VMCH-67-000005
+    - advsettings
+  when:
+   - run_diskwipe_disable | bool
+
+
+############################################
+
+# Independent, non-persistent disks must be not be used on the virtual machine.
+
+- name: VMCH-67-000006 - Gather disk backing information
+  community.vmware.vmware_guest_disk_info:
+    name: "{{ vm_name }}"
+    validate_certs: no
+    datacenter: "{{ datacenter }}"
+  delegate_to: localhost
+  tags:
+    - VMCH-67-000006
+    - hardware
+  when:
+    - run_independent_persistent_disk | bool
+  register: disk_info
+
+- name: VMCH-67-000006 - Set disk to Independent, non-persistent
+  community.vmware.vmware_guest_disk:
+    name: "{{ vm_name }}"
+    state: "present"
+    datacenter: "{{ datacenter }}"
+    validate_certs: no
+    disk:
+      datastore: "{{ disk_info.datastore }}"
+      state: present
+      backing_uuid: "{{ disk_info.backing_uuid }}"
+      backing_disk_mode: "{{ disk_mode }}"
+  delegate_to: localhost
+  with_items:
+    - "{{ disk_info.backing_uuid }}"
+  tags:
+    - VMCH-67-000006
+    - hardware
+  when:
+    - run_independent_persistent_disk | bool
+    - "{{ disk_info.backing_diskmode }}" != "{{ disk_mode }}"
+
+############################################
+
+# HGFS file transfers must be disabled on the virtual machine.
+
+- name: VMCH-67-000007 - Disable HGFS file transfers
+  community.vmware.vmware_guest:
+    name: {{ vm_name }}
+    state: present
+    validate_certs: no
+    customvalues:
+      - key: "isolation.tools.hgfsServerSet.disable"
+        value: {{ hgfs_server }}
+  tags:
+    - VMCH-67-000007
+    - advsettings
+  when:
+    - run_hgfsserver_disable | bool
+
+############################################
+
+# Unauthorized floppy devices must be disconnected on the virtual machine.
+
+- name: VMCH-67-000008 - Remove unauthorized floppy drives
+  community.vmware.vmware_guest:
+    name: {{ vm_name }}
+    state: present
+    validate_certs: no
+    vm_floppy:
+
+  tags:
+    - VMCH-67-000008
+    - hardware
+  when:
+    - run_remove_floppy | bool
+
+############################################
+
+# Unauthorized CD/DVD devices must be disconnected on the virtual machine.
+
+- name: VMCH-67-000009 - Remove unauthorized CD/DVD drives
+  community.vmware.vmware_guest:
+    name: {{ vm_name }}
+    state: present
+    validate_certs: no
+    datacenter: "{{ datacenter }}"
+    cdrom:
+      - type: "{{ cd_type }}"
+  tags:
+    - VMCH-67-000009
+    - hardware
+  when:
+    - run_disconnect_cd | bool
+
+############################################
+
+# Unauthorized parallel devices must be disconnected on the virtual machine.
+
+- name: VMCH-67-000010 - Remove unauthorized parallel devices
+  community.vmware.vmware_guest:
+    name: {{ vm_name }}
+    state: present
+    validate_certs: no
+    datacenter: "{{ datacenter }}"
+
+  tags:
+    - VMCH-67-000010
+    - hardware
+  when:
+    - run_remove_parallel_devices | bool
+
+############################################
+
+# Unauthorized serial devices must be disconnected on the virtual machine.
+
+- name: VMCH-67-000011 - Remove unauthorized serial devices
+  community.vmware.vmware_guest_serial_port:
+    name: {{ vm_name }}
+    state: present
+    validate_certs: no
+    backings:
+      - type: 'pipe'
+        state: "{{ serial_state }}"
+    delegate_to: localhost
+  tags:
+    - VMCH-67-000011
+    - hardware
+  when:
+    - run_remove_serial_devices | bool
+
+############################################
+
+# Unauthorized USB devices must be disconnected on the virtual machine.
+
+- name: VMCH-67-000012 - Disable unauthorized USB devices
+  community.vmware.vmware_guest:
+    name: {{ vm_name }}
+    state: present
+    validate_certs: no
+    
+  tags:
+    - VMCH-67-000012
+    - hardware
+  when:
+    - run_remove_usb_devices | bool
+
+############################################
+
+# Console connection sharing must be limited on the virtual machine.
+
+- name: VMCH-67-000013 - Limit console connections to 1
+  community.vmware.vmware_guest:
+    name: {{ vm_name }}
+    state: present
+    validate_certs: no
+    customvalues:
+      - key: "RemoteDisplay.maxConnections"
+        value: {{ max_connections }}
+  tags:
+    - VMCH-67-000013
+    - advsettings
+  when:
+    - run_max_connections | bool

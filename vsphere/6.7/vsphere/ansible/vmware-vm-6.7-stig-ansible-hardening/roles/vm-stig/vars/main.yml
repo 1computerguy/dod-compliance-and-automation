@@ -1,0 +1,23 @@
+# Set global datacenter
+datacenter: "FortGordon"
+
+# Set Advanced VM settings variables
+tools_copy: "TRUE"
+tools_dnd: "TRUE"
+tools_paste: "TRUE"
+tools_diskshrink: "TRUE"
+tools_diskwipe: "TRUE"
+max_connections: 1
+tools_vnc: "FALSE"
+setinfo_sizelimit: 1048576
+tools_connectable: "TRUE"
+tools_hostinfo: "FALSE"
+desktop_autolock: "TRUE"
+tools_enable3d: "FALSE"
+hgfs_server: "TRUE"
+
+# Set VM hardware settings
+independent_persistent_disk: "independent_persistent"
+cd_type: "none"
+max_connections: 1
+serial_state: "absent"
